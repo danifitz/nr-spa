@@ -21,7 +21,6 @@ sap.ui.define([
         metadata: {
             "manifest": "json"
         },
-
         /*
          * Here's where we do some important stuff to do with New Relic to enhance
          * the data that is reported by the Browser agent.
@@ -93,7 +92,6 @@ sap.ui.define([
                 newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName());
             }
         },
-
         /* 
          * Check if the user has said yes to tracking. We can use this to allow for opt-out for users.
          * https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.UsageAnalytics
@@ -102,7 +100,6 @@ sap.ui.define([
             const userTrackingPreferences = await this.getUshellServiceAsync("UsageAnalytics");
             return userTrackingPreferences.userEnabled;
         },
-
         /*
          * Uses the AppLifeCycle service to listen for apps being loaded in the FLP.
          * When we detect an app being loaded, gather some information about it and
@@ -132,7 +129,6 @@ sap.ui.define([
                 console.log('[New Relic] - app loaded event fired with parameters: ', oParameters)
             }.bind(this));
         },
-
         /*
          * Get the value after the URL hash to determine which app is active
          */
@@ -148,7 +144,6 @@ sap.ui.define([
 
 			return (subSite !== "") ? subSite : undefined;
 		},
-
         /* 
          * Gets an instance of a service from the SAP UShell
          *      serviceName - the name of the service you want from the Ushell Library
