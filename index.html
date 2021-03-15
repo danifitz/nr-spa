@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2009-2017 SAP SE, All Rights Reserved -->
+<html class="sapUShellFullHeight">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/danifitz/nr-spa/nr.js"></script>
+        <script id="sap-ui-bootstrap" type="text/javascript" src="{{include "./system/env/ui5ResourceRoot.txt"}}sap/ushell_abap/bootstrap/evo/abap.js"></script>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            crossorigin="anonymous"
+            href="{{include "./user/env/themePrefix"}}/sap/ui/core/themes/{{include "./user/env/themeName"}}/library{{include "./user/env/isRtl"}}.css"
+            id="sap-ui-theme-sap.ui.core"/>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            crossorigin="anonymous"
+            href="{{include "./user/env/themePrefix"}}/sap/m/themes/{{include "./user/env/themeName"}}/library{{include "./user/env/isRtl"}}.css"
+            id="sap-ui-theme-sap.m"/>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            crossorigin="anonymous"
+            href="{{include "./user/env/themePrefix"}}/sap/ushell/themes/{{include "./user/env/themeName"}}/library{{include "./user/env/isRtl"}}.css"
+            id="sap-ui-theme-sap.ushell"/>
+
+        <!-- Adding script to display Browser compactible warning message -->
+        <script type="text/javascript">
+          /* Change - Adding MessageStrip in Sub Header to show Chrome default browser messager in IE
+           *  Author - Sumit Khedkar
+           *  Date - 10 June 2019
+           */
+
+          // Call function to check whether sap.m library has loaded or not
+          checkLibLoad();
+
+          // Checking whether library has loaded or not
+          function checkLibLoad() {
+
+            if (typeof sap.m !== "undefined" && typeof sap.m.MessageStrip !== "undefined"
+                && document.getElementById("canvas") !== null && document.getElementById("brwMsgDiv") !== null){
+              // call function to display message strip if its chrome
+              displayBrwMessageStrip();
+            }else{
+              // rechecking library status after 1 ms
+              setTimeout("checkLibLoad()",1000);
+            }
+          }
+
+          // Displaying Browser warning message at top if its non Chrome browser
+          function displayBrwMessageStrip(){
+
+              // Check for Chrome Browser
+              var isChrome = !!window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+              var element = document.getElementById("brwMsgDiv");
+              var sHashValue = window.location.hash;
+
+              // Display below message in  Non-Chrome Browser
+              if(!isChrome && (sHashValue === "#Shell-home" || sHashValue === "")){
+
+                  // Declare MessageStrip with Message and Link
+                  var oMsgStrip = new sap.m.MessageStrip({
+                            text:"The preferred browser for PLM 2.0 is Chrome. Please switch to Chrome.",
+                            showCloseButton:true,
+                            type:"Warning",
+                            close:function(){
+                              // Hide message strip div and remove height css for div #canvas
+                              element.parentNode.removeChild(element);
+                              document.getElementById("canvas").classList.remove('brwHtBodyWithMsg');
+
+                              document.getElementsByTagName("body")[0].classList.remove('brwMsgStripAllign');
+                            },
+                            link:[new sap.m.Link({text:"(Install Chrome)",target:"_blank",href:"https://deviceandappstore.unilever.com/"})]
+                  });
+
+                  oMsgStrip.addStyleClass("brwMsgStrip");
+                  oMsgStrip.placeAt("brwMsgDiv");
+
+                  setTimeout(function(){
+                      // Creating CSS Element to add CSS in Body
+                      var style = document.createElement('style');
+                      style.type = 'text/css';
+
+                      // Adding 2 CSS class for Body Height and Message Strip
+                      var sCSSClass = '.brwHtBodyWithMsg { height: calc(100% - 38px) !important; }';
+                      sCSSClass = sCSSClass + '.brwMsgStrip {width: 100% !important;font-weight: bold;}';
+
+                      // Reading Message Strip Height
+                      var iMsgStripHt = document.getElementById('brwMsgDiv').offsetHeight;
+
+                      // Declaring CSS to Allign Fiori Launchpad Shell from top at determined message strip height
+                      sCSSClass = sCSSClass + '.brwMsgStripAllign>.sapUshellShellHead>.sapUshellShellCntnt { top:'+iMsgStripHt+'px !important;}';
+                      sCSSClass = sCSSClass + '.brwMsgStripAllign .sapUshellShellBG {top:'+iMsgStripHt+'px;}';
+
+                      style.innerHTML = sCSSClass;
+
+                      document.getElementsByTagName('head')[0].appendChild(style);
+
+                      // Apply Height CSS to Div #canvas to handle height
+                      document.getElementById("canvas").classList.add('brwHtBodyWithMsg');
+
+                      // Apply Height CSS to Body to handle Strip Position
+                      document.getElementsByTagName("body")[0].classList.add('brwMsgStripAllign');
+                  }.bind(this),100);
+
+              }else{
+                  element.parentNode.removeChild(element);
+              }
+
+           }
+        </script>
+    </head>
+
+    <body class="sapUiBody sapUShellFullHeight" role="application">
+      <div id="brwMsgDiv" ></div>
+      <div id="canvas" class="sapUShellFullHeight sapMShellBG sapUshellShellBG sapUiGlobalBackgroundImage"></div>
+    </body>
+</html>
