@@ -112,7 +112,11 @@ sap.ui.define([
                 if (oParameters.homePage != true) {
                     // get some key information about the app that just loaded to store as custom attributes in New Relic
                     // https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.AppLifeCycle%23methods/attachAppLoaded
-                    appLifeCycleService.getCurrentApplication.getInfo(['appIntent', 'appFrameworkId', 'appId', 'appVersion', 'appFrameworkVersion']).then(function (params) {
+                    let currentApp = appLifeCycleService.getCurrentApplication();
+                    
+                    console.log('[New Relic] Got information about the currently running app', currentApp);
+
+                    currentApp.getInfo(['appIntent', 'appFrameworkId', 'appId', 'appVersion', 'appFrameworkVersion']).then(function (params) {
                         for (const [key, value] of Object.entries(params)) {
                             console.log('[New Relic]: Setting custom attributes from app loaded event:', `${key}: ${value}`);
                             newrelic.setCustomAttribute(key, value);
