@@ -22,6 +22,12 @@ sap.ui.define([
             "manifest": "json"
         },
 
+        /*
+         * Here's where we do some important stuff to do with New Relic to enhance
+         * the data that is reported by the Browser agent.
+         *
+         * Docs: https://docs.newrelic.com/docs/browser/new-relic-browser/browser-agent-spa-api/
+         */
         init: function () {
             if (window.newrelic.info || newrelic.info) {
                 console.log('New Relic component loaded!');
@@ -127,7 +133,9 @@ sap.ui.define([
             }.bind(this));
         },
 
-        // Get the value after the URL hash to determine which app is active
+        /*
+         * Get the value after the URL hash to determine which app is active
+         */
 		getFlpAppName: function() {
 			let subSite = "";
 
@@ -141,8 +149,11 @@ sap.ui.define([
 			return (subSite !== "") ? subSite : undefined;
 		},
 
-        // serviceName - the name of the service you want from the Ushell Library
-        // https://sapui5.hana.ondemand.com/#/api/sap.ushell.services
+        /* 
+         * Gets an instance of a service from the SAP UShell
+         *      serviceName - the name of the service you want from the Ushell Library
+         * https://sapui5.hana.ondemand.com/#/api/sap.ushell.services
+         */
         getUshellServiceAsync: async function (serviceName) {
             return new Promise(resolve => sap.ui.require([
                 "sap/ushell/library"
