@@ -87,14 +87,24 @@ sap.ui.define([
                 newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName());
             }
         },
-        // Check if the user has said yes to tracking
-        // https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.UsageAnalytics
+
+        /* 
+         * Check if the user has said yes to tracking. We can use this to allow for opt-out for users.
+         * https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.UsageAnalytics
+         */
         getUserTrackingPreferences: async function () {
             const userTrackingPreferences = await this.getUshellServiceAsync("UsageAnalytics");
             return userTrackingPreferences.userEnabled;
         },
+
+        /*
+         * Uses the AppLifeCycle service to listen for apps being loaded in the FLP.
+         * When we detect an app being loaded, gather some information about it and
+         * store that as custom attributes in New Relic.
+         */
         getAppLifecycle: async function () {
             const appLifeCycleService = await this.getUshellServiceAsync("AppLifeCycle");
+
             appLifeCycleService.attachAppLoaded(function (oEvent) {
                 let oParameters = oEvent.getParameters();
                 
