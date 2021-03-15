@@ -27,26 +27,57 @@ sap.ui.define([
                 console.log('New Relic component loaded!');
 
                 // check user tracking preferences
-                let consent = getUserTrackingPreferences();
+                let consent = this.getUserTrackingPreferences();
                 console.log('[New Relic] user has consented to tracking:', consent);
+
+                // Set which environment this is i.e. dev/prod
+                newrelic.setCustomAttribute('environment', this.getEnvironment());
 
                 // listen for hash change events and set the custom attribute in NR
                 window.onhashchange = function () {
-					let fioriAppName = this.getFlpAppName();
-                    newrelic.setCustomAttribute('fioriApp', fioriAppName);
+					let hashFragment = this.getFlpAppName();
+                    newrelic.setCustomAttribute('hashFragment', hashFragment);
+
+                    // set page title as a custom attribute
+                    newrelic.setCustomAttribute('pageTitle', document.title);
 				};
 
                 //TODO: only capture details if the user has consented to tracking.
                 
                 // add the user details 
-                addUserDetailsToNewRelic();
+                this.addUserDetailsToNewRelic();
 
                 // listen for the app lifecycle events
-                getAppLifecycle();
+                this.getAppLifecycle();
             } else {
                 console.log('New Relic component did not load correctly')
             }
         },
+        /*
+         * Determine the current PLM environment using the URL
+         *   plm-dev.unilever.com - Development
+         *   plm-qa.unilever.com - QA
+         *   plm-regr.unilever.com - Regression
+         *   plm-sbx.unilever.com - Sandbox
+         *   plm.unilever.com - Production
+         */
+        getEnvironment: function() {
+            // get the current URL from the browser
+            let currentUrl = new URL(window.location.href);
+
+            // assume environment is production unless the URL tells us otherwise.
+            let currentEnvironment = 'production';
+            for (let env in ['dev', 'qa', 'regr', 'sbx']) {
+                if(currentUrl.indexOf(env) !== -1) {
+                    currentEnvironment = env;
+                }
+            }
+            console.log('[New Relic] determined current environment:', currentEnvironment);
+            return currentEnvironment;
+        },
+        /*
+         * Adds details about the current logged in user as custom attributes to New Relic
+         */
         addUserDetailsToNewRelic: async function () {
             const oUserInfo = await this.getUshellServiceAsync("UserInfo");
             if (newrelic) {
