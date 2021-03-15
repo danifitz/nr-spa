@@ -126,6 +126,7 @@ sap.ui.define([
                 console.log('[New Relic] - app loaded event fired with parameters: ', oParameters)
             }.bind(this));
         },
+
         // Get the value after the URL hash to determine which app is active
 		getFlpAppName: function() {
 			let subSite = "";
@@ -139,6 +140,7 @@ sap.ui.define([
 
 			return (subSite !== "") ? subSite : undefined;
 		},
+
         // serviceName - the name of the service you want from the Ushell Library
         // https://sapui5.hana.ondemand.com/#/api/sap.ushell.services
         getUshellServiceAsync: async function (serviceName) {
