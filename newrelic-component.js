@@ -48,7 +48,7 @@ sap.ui.define([
                 newrelic.setCustomAttribute('sapUiVersion', sap.ui.version);
 
                 //TODO: only capture details if the user has consented to tracking.
-                
+
                 // add the user details 
                 this.addUserDetailsToNewRelic();
 
@@ -66,7 +66,7 @@ sap.ui.define([
          *   plm-sbx.unilever.com - Sandbox
          *   plm.unilever.com - Production
          */
-        getEnvironment: function() {
+        getEnvironment: function () {
             // get the current URL from the browser
             let currentUrl = new URL(window.location.href);
             const environments = ['dev', 'qa', 'regr', 'sbx'];
@@ -74,7 +74,7 @@ sap.ui.define([
             // assume environment is production unless the URL tells us otherwise.
             let currentEnvironment = 'production';
             for (let env in environments) {
-                if(currentUrl.host.indexOf(environments[env]) !== -1) {
+                if (currentUrl.host.indexOf(environments[env]) !== -1) {
                     currentEnvironment = environments[env];
                 }
             }
@@ -114,48 +114,51 @@ sap.ui.define([
             appLifeCycleService.attachAppLoaded(function (oEvent) {
                 console.log('[New Relic] attachAppLoaded event fired!');
                 let oParameters = oEvent.getParameters();
-                
-                // we don't care if the user just landed on the home page i.e. FLP shell
-                if (oParameters.homePage != true) {
-                    // get some key information about the app that just loaded to store as custom attributes in New Relic
-                    // https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.AppLifeCycle%23methods/attachAppLoaded
-                    let currentApp = appLifeCycleService.getCurrentApplication();
 
-                    currentApp.getIntent().then(intent => {
+                // get some key information about the app that just loaded to store as custom attributes in New Relic
+                // https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.AppLifeCycle%23methods/attachAppLoaded
+                let currentApp = appLifeCycleService.getCurrentApplication();
 
-                        // Check if there are any params we need to parse
-                        if(Object.keys(intent.params).length !== 0) {
-                            //loop through all the properties in the params object
-                            for (const [key, param] of Object.entries(intent.params)) {
-                                console.log('[New Relic] getAppLifeCycle - checking for params in intent');
-                                //if we've dealing with an array
-                                if(Array.isArray(param)) {
-                                    console.log('[New Relic] getAppLifeCycle - checking if params are an array of args')
-                                    for(let i = 0; i < param.length; i++) {
-                                        newrelic.setCustomAttribute('intentParam' + key, param[i]);
-                                        console.log('[New Relic] getAppLifeCycle - setting intent params', 'intentParam' + key, param[i]);
-                                    }
-                                } else {
-                                    console.log('[New Relic] getAppLifeCycle - found param but it wasn\'t an array! it was a', typeof param);
+                currentApp.getIntent().then(intent => {
+
+                    // Check if there are any params we need to parse
+                    if (Object.keys(intent.params).length !== 0) {
+                        //loop through all the properties in the params object
+                        for (const [key, param] of Object.entries(intent.params)) {
+                            console.log('[New Relic] getAppLifeCycle - checking for params in intent');
+                            //if we've dealing with an array
+                            if (Array.isArray(param)) {
+                                console.log('[New Relic] getAppLifeCycle - checking if params are an array of args')
+                                for (let i = 0; i < param.length; i++) {
+                                    newrelic.setCustomAttribute('intentParam' + key, param[i]);
+                                    console.log('[New Relic] getAppLifeCycle - setting intent params', 'intentParam' + key, param[i]);
                                 }
+                            } else {
+                                console.log('[New Relic] getAppLifeCycle - found param but it wasn\'t an array! it was a', typeof param);
                             }
                         }
-                        console.log('[New Relic] Got information about the currently running app:', intent.semanticObject);
-                        // create a page action in New Relic to indicate an app is being loaded.
-                        newrelic.addPageAction('loadApp', intent);
-                        newrelic.setCustomAttribute('semanticObject', intent.semanticObject);
-                        newrelic.setCustomAttribute('plmAppName', intent.semanticObject);
-                        newrelic.setCustomAttribute('action', intent.action);
-                        newrelic.setCustomAttribute('appSpecificRoute', intent.appSpecificRoute);
-                    });
+                    }
+                    console.log('[New Relic] Got information about the currently running app:', intent.semanticObject);
+                    // create a page action in New Relic to indicate an app is being loaded.
+                    newrelic.addPageAction('loadApp', intent);
+                    newrelic.setCustomAttribute('semanticObject', intent.semanticObject);
+                    newrelic.setCustomAttribute('plmAppName', intent.semanticObject);
+                    newrelic.setCustomAttribute('action', intent.action);
+                    newrelic.setCustomAttribute('appSpecificRoute', intent.appSpecificRoute);
+                });
 
-                    currentApp.getInfo(['productName', 'languageTag', 'appIntent', 'appFrameworkId', 'appId', 'appVersion', 'appFrameworkVersion']).then(function (params) {
-                        for (const [key, value] of Object.entries(params)) {
-                            console.log('[New Relic]: Setting custom attributes from app loaded event:', `${'plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase())}: ${value}`);
-                            newrelic.setCustomAttribute('plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase()), value);
-                        }
-                    });
-                }
+                currentApp.getInfo(['productName', 'languageTag', 'appIntent', 'appFrameworkId', 'appId', 'appVersion', 'appFrameworkVersion']).then(function (params) {
+                    for (const [key, value] of Object.entries(params)) {
+                        console.log('[New Relic]: Setting custom attributes from app loaded event:', `${'plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase())}: ${value}`);
+                        newrelic.setCustomAttribute('plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase()), value);
+                    }
+                });
+
+                // we don't care if the user just landed on the home page i.e. FLP shell
+                // if (oParameters.homePage != true) {
+
+                // }
+
                 console.log('[New Relic] - app loaded event fired with parameters: ', oParameters);
             });
         },
