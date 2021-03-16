@@ -2,7 +2,7 @@ sap.ui.define([
     "sap/ui/core/Component"
 ], function (Component) {
 
-    /*
+    /**
      * Attributes we set in this component
      * hashFragment - the portion of the URL after the # i.e. #Shell-home
      * pageTitle - the title of the HTML document
@@ -22,7 +22,7 @@ sap.ui.define([
         metadata: {
             "manifest": "json"
         },
-        /*
+        /**
          * Here's where we do some important stuff to do with New Relic to enhance
          * the data that is reported by the Browser agent.
          *
@@ -64,7 +64,7 @@ sap.ui.define([
                 console.log('New Relic component did not load correctly')
             }
         },
-        /*
+        /**
          * Determine the current PLM environment using the URL
          *   plm-dev.unilever.com - Development
          *   plm-qa.unilever.com - QA
@@ -90,7 +90,7 @@ sap.ui.define([
             console.log('[New Relic] determined the current environment is:', currentEnvironment);
             return currentEnvironment;
         },
-        /*
+        /**
          * Adds details about the current logged in user as custom attributes to New Relic
          */
         addUserDetailsToNewRelic: async function () {
@@ -98,13 +98,13 @@ sap.ui.define([
             if (newrelic) {
                 console.log('[New Relic]: Setting the current logged in user');
                 newrelic.setCustomAttribute('userId', oUserInfo.getId());
-                if(sap.ui.version >= '1.86.0') {
+                if (this.versionCompare(sap.ui.version,'1.86.0') === 1) {
                     newrelic.setCustomAttribute('userEmail', oUserInfo.getEmail());
                     newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName());
                 }
             }
         },
-        /* 
+        /**  
          * Check if the user has said yes to tracking. We can use this to allow for opt-out for users.
          * https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.UsageAnalytics
          */
@@ -121,7 +121,10 @@ sap.ui.define([
             newrelic.setCustomAttribute('semanticObject', intent.semanticObject);
             newrelic.setCustomAttribute('plmAppName', intent.semanticObject);
             newrelic.setCustomAttribute('action', intent.action);
-            newrelic.setCustomAttribute('appSpecificRoute', intent.appSpecificRoute);
+            // app specific route is sometimes undefined, so check before trying to set attribute
+            if (typeof intent.appSpecificRoute !== 'undefined') {
+                newrelic.setCustomAttribute('appSpecificRoute', intent.appSpecificRoute);
+            }
 
             // Check if there are any params we need to parse
             if (Object.keys(intent.params).length !== 0) {
@@ -139,9 +142,9 @@ sap.ui.define([
                         console.log('[New Relic] getAppLifeCycle - found param but it wasn\'t an array! it was a', typeof param);
                     }
                 }
-            }    
+            }
         },
-        /*
+        /** 
          * Uses the AppLifeCycle service to listen for apps being loaded in the FLP.
          * When we detect an app being loaded, gather some information about it and
          * store that as custom attributes in New Relic.
@@ -151,12 +154,12 @@ sap.ui.define([
             console.log('[New Relic] got AppLifeCycleService', appLifeCycleService);
 
             appLifeCycleService.attachAppLoaded(function (oEvent) {
-                console.log('[New Relic] getAppLifeCycle - added Page Action: loadApp');
                 // create a page action in New Relic to indicate an app has being loaded.
                 newrelic.addPageAction('loadApp', this.getIntent());
+                console.log('[New Relic] getAppLifeCycle - added Page Action: loadApp');
 
-                if (sap.ui.version >= '1.85.0') {
-                    // Only available in sap.ui.version > 1.85.0
+                if (this.versionCompare(sap.ui.version, '1.80.0') === 1) {
+                    // Only available in sap.ui.version > 1.80.0
                     appLifeCycleService.getCurrentApplication().getInfo(['productName', 'languageTag', 'appIntent', 'appFrameworkId', 'appId', 'appVersion', 'appFrameworkVersion']).then(function (params) {
                         for (const [key, value] of Object.entries(params)) {
                             console.log('[New Relic]: Setting custom attributes from app loaded event:', `${'plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase())}: ${value}`);
@@ -173,10 +176,13 @@ sap.ui.define([
             let intent = urlParsingService.parseShellHash(shellHash);
             return intent;
         },
-        /* 
+        /** 
          * Gets an instance of a service from the SAP UShell
-         *      serviceName - the name of the service you want from the Ushell Library
+         * 
          * https://sapui5.hana.ondemand.com/#/api/sap.ushell.services
+         *
+         * @param {string} serviceName - the name of the service you want from the Ushell Library
+         * 
          */
         getUshellServiceAsync: async function (serviceName) {
             return new Promise(resolve => sap.ui.require([
@@ -186,6 +192,80 @@ sap.ui.define([
                 const pService = oContainer.getServiceAsync(serviceName); // getServiceAsync available since 1.55
                 resolve(pService);
             }));
+        },
+        /**
+         * Compares two software version numbers (e.g. "1.7.1" or "1.2b").
+         *
+         * This function was born in http://stackoverflow.com/a/6832721.
+         *
+         * @param {string} v1 The first version to be compared.
+         * @param {string} v2 The second version to be compared.
+         * @param {object} [options] Optional flags that affect comparison behavior:
+         * <ul>
+         *     <li>
+         *         <tt>lexicographical: true</tt> compares each part of the version strings lexicographically instead of
+         *         naturally; this allows suffixes such as "b" or "dev" but will cause "1.10" to be considered smaller than
+         *         "1.2".
+         *     </li>
+         *     <li>
+         *         <tt>zeroExtend: true</tt> changes the result if one version string has less parts than the other. In
+         *         this case the shorter string will be padded with "zero" parts instead of being considered smaller.
+         *     </li>
+         * </ul>
+         * @returns {number|NaN}
+         * <ul>
+         *    <li>0 if the versions are equal</li>
+         *    <li>a negative integer iff v1 < v2</li>
+         *    <li>a positive integer iff v1 > v2</li>
+         *    <li>NaN if either version string is in the wrong format</li>
+         * </ul>
+         *
+         */
+        versionCompare: function (v1, v2, options) {
+            var lexicographical = options && options.lexicographical,
+                zeroExtend = options && options.zeroExtend,
+                v1parts = v1.split('.'),
+                v2parts = v2.split('.');
+
+            function isValidPart(x) {
+                return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
+            }
+
+            if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) {
+                return NaN;
+            }
+
+            if (zeroExtend) {
+                while (v1parts.length < v2parts.length) v1parts.push("0");
+                while (v2parts.length < v1parts.length) v2parts.push("0");
+            }
+
+            if (!lexicographical) {
+                v1parts = v1parts.map(Number);
+                v2parts = v2parts.map(Number);
+            }
+
+            for (var i = 0; i < v1parts.length; ++i) {
+                if (v2parts.length == i) {
+                    return 1;
+                }
+
+                if (v1parts[i] == v2parts[i]) {
+                    continue;
+                }
+                else if (v1parts[i] > v2parts[i]) {
+                    return 1;
+                }
+                else {
+                    return -1;
+                }
+            }
+
+            if (v1parts.length != v2parts.length) {
+                return -1;
+            }
+
+            return 0;
         }
     });
 });
