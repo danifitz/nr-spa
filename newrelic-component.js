@@ -35,8 +35,11 @@ sap.ui.define([
                 console.log('New Relic component loaded!');
 
                 // check user tracking preferences
-                let consent = this.getUserTrackingPreferences();
-                console.log('[New Relic] user has consented to tracking:', consent);
+                this.getUserTrackingPreferences().then(consent => {
+                    console.log('[New Relic] user has consented to tracking:', consent);
+                }).catch(error => {
+                    console.log('[New Relic] user tracking preferences: error', error);
+                });
 
                 // Set which environment this is i.e. dev/prod
                 newrelic.setCustomAttribute('environment', this.getEnvironment());
