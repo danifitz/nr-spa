@@ -18,6 +18,9 @@ sap.ui.define([
      */
     return Component.extend("com.plm.appnewrelicpocplugin.Component", {
 
+
+        // 1.60.13
+
         metadata: {
             "manifest": "json"
         },
@@ -40,10 +43,11 @@ sap.ui.define([
 
                 // listen for hash change events and set the custom attribute in NR
                 window.addEventListener('hashchange', function() {
-					let hashFragment = this.getFlpAppName();
-                    newrelic.setCustomAttribute('hashFragment', hashFragment);
+					// let hashFragment = this.getFlpAppName();
+                    // newrelic.setCustomAttribute('hashFragment', hashFragment);
 
                     // set page title as a custom attribute
+                    console.log('[New Relic] Setting custom attribute pageTitle:', document.title);
                     newrelic.setCustomAttribute('pageTitle', document.title);
 				});
 
@@ -89,8 +93,8 @@ sap.ui.define([
             if (newrelic) {
                 console.log('[New Relic]: Setting the current logged in user');
                 newrelic.setCustomAttribute('userId', oUserInfo.getId());
-                // newrelic.setCustomAttribute('userEmail', oUserInfo.getEmail());
-                // newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName());
+                // newrelic.setCustomAttribute('userEmail', oUserInfo.getEmail()); - supported since v1.86.0
+                // newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName()); - supported since v1.86.0
             }
         },
         /* 
@@ -130,21 +134,6 @@ sap.ui.define([
                 console.log('[New Relic] - app loaded event fired with parameters: ', oParameters)
             }.bind(this));
         },
-        /*
-         * Get the value after the URL hash to determine which app is active
-         */
-		getFlpAppName: function() {
-			let subSite = "";
-
-			if (window.location.href.substring(window.location.href.indexOf("#")) !== -1) {
-				subSite = window.location.href.substring(window.location.href.indexOf("#") + 1);
-			}
-			if (subSite.indexOf("&") !== -1) {
-				subSite = subSite.substring(0, subSite.indexOf("&"));
-			}
-
-			return (subSite !== "") ? subSite : undefined;
-		},
         /* 
          * Gets an instance of a service from the SAP UShell
          *      serviceName - the name of the service you want from the Ushell Library
