@@ -39,13 +39,13 @@ sap.ui.define([
                 newrelic.setCustomAttribute('environment', this.getEnvironment());
 
                 // listen for hash change events and set the custom attribute in NR
-                window.onhashchange = function () {
+                window.addEventListener('hashchange', function() {
 					let hashFragment = this.getFlpAppName();
                     newrelic.setCustomAttribute('hashFragment', hashFragment);
 
                     // set page title as a custom attribute
                     newrelic.setCustomAttribute('pageTitle', document.title);
-				};
+				});
 
                 //TODO: only capture details if the user has consented to tracking.
                 
@@ -69,15 +69,16 @@ sap.ui.define([
         getEnvironment: function() {
             // get the current URL from the browser
             let currentUrl = new URL(window.location.href);
+            const environments = ['dev', 'qa', 'regr', 'sbx'];
 
             // assume environment is production unless the URL tells us otherwise.
             let currentEnvironment = 'production';
-            for (let env in ['dev', 'qa', 'regr', 'sbx']) {
-                if(currentUrl.indexOf(env) !== -1) {
-                    currentEnvironment = env;
+            for (let env in environments) {
+                if(currentUrl.host.indexOf(environments[env]) !== -1) {
+                    currentEnvironment = environments[env];
                 }
             }
-            console.log('[New Relic] determined current environment:', currentEnvironment);
+            console.log('[New Relic] determined the current environment is:', currentEnvironment);
             return currentEnvironment;
         },
         /*
@@ -98,7 +99,7 @@ sap.ui.define([
          */
         getUserTrackingPreferences: async function () {
             const userTrackingPreferences = await this.getUshellServiceAsync("UsageAnalytics");
-            return userTrackingPreferences.userEnabled;
+            return userTrackingPreferences.userEnabled();
         },
         /*
          * Uses the AppLifeCycle service to listen for apps being loaded in the FLP.
