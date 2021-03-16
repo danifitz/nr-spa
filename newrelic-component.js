@@ -41,15 +41,8 @@ sap.ui.define([
                 // Set which environment this is i.e. dev/prod
                 newrelic.setCustomAttribute('environment', this.getEnvironment());
 
-                // listen for hash change events and set the custom attribute in NR
-                window.addEventListener('hashchange', function() {
-					// let hashFragment = this.getFlpAppName();
-                    // newrelic.setCustomAttribute('hashFragment', hashFragment);
-
-                    // set page title as a custom attribute
-                    console.log('[New Relic] Setting custom attribute pageTitle:', document.title);
-                    newrelic.setCustomAttribute('pageTitle', document.title);
-				});
+                // add the SAP UI Version as a custom attribute
+                newrelic.setCustomAttribute('sapUiVersion', sap.ui.version);
 
                 //TODO: only capture details if the user has consented to tracking.
                 
