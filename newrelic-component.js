@@ -115,7 +115,7 @@ sap.ui.define([
             console.log('[New Relic] got AppLifeCycleService', appLifeCycleService);
 
             // TODO: fix this since it's redundant code
-            appLifeCycleService.getCurrentApplication().getIntent().then(intent => {
+            appLifeCycleService.getCurrentApplication('getIntent').getIntent().then(intent => {
                 // Check if there are any params we need to parse
                 if (Object.keys(intent.params).length !== 0) {
                     //loop through all the properties in the params object
@@ -148,7 +148,7 @@ sap.ui.define([
 
                 // get some key information about the app that just loaded to store as custom attributes in New Relic
                 // https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.AppLifeCycle%23methods/attachAppLoaded
-                let currentApp = appLifeCycleService.getCurrentApplication();
+                let currentApp = appLifeCycleService.getCurrentApplication('getIntent');
 
                 currentApp.getIntent().then(intent => {
 
