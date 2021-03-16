@@ -62,6 +62,7 @@ sap.ui.define([
          * Determine the current PLM environment using the URL
          *   plm-dev.unilever.com - Development
          *   plm-qa.unilever.com - QA
+         *   plm-perf.unilever.com = Performance
          *   plm-regr.unilever.com - Regression
          *   plm-sbx.unilever.com - Sandbox
          *   plm.unilever.com - Production
