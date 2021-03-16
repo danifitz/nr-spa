@@ -70,6 +70,8 @@ sap.ui.define([
         getEnvironment: function () {
             // get the current URL from the browser
             let currentUrl = new URL(window.location.href);
+
+            //TODO: map these keys to the full names i.e. Performance, Regression, Production
             const environments = ['dev', 'qa', 'perf', 'regr', 'sbx'];
 
             // assume environment is production unless the URL tells us otherwise.
@@ -111,6 +113,34 @@ sap.ui.define([
             // const appLifeCycleService = await this.getUshellServiceAsync("AppLifeCycle");
             var appLifeCycleService = sap.ushell.Container.getService("AppLifeCycle");
             console.log('[New Relic] got AppLifeCycleService', appLifeCycleService);
+
+            // TODO: fix this since it's redundant code
+            appLifeCycleService.getCurrentApplication().getIntent().then(intent => {
+                // Check if there are any params we need to parse
+                if (Object.keys(intent.params).length !== 0) {
+                    //loop through all the properties in the params object
+                    for (const [key, param] of Object.entries(intent.params)) {
+                        console.log('[New Relic] getAppLifeCycle - checking for params in intent');
+                        //if we've dealing with an array
+                        if (Array.isArray(param)) {
+                            console.log('[New Relic] getAppLifeCycle - checking if params are an array of args')
+                            for (let i = 0; i < param.length; i++) {
+                                newrelic.setCustomAttribute('intentParam' + key, param[i]);
+                                console.log('[New Relic] getAppLifeCycle - setting intent params', 'intentParam' + key, param[i]);
+                            }
+                        } else {
+                            console.log('[New Relic] getAppLifeCycle - found param but it wasn\'t an array! it was a', typeof param);
+                        }
+                    }
+                }
+                console.log('[New Relic] Got information about the currently running app:', intent.semanticObject);
+                // create a page action in New Relic to indicate an app is being loaded.
+                newrelic.addPageAction('loadApp', intent);
+                newrelic.setCustomAttribute('semanticObject', intent.semanticObject);
+                newrelic.setCustomAttribute('plmAppName', intent.semanticObject);
+                newrelic.setCustomAttribute('action', intent.action);
+                newrelic.setCustomAttribute('appSpecificRoute', intent.appSpecificRoute);
+            });
 
             appLifeCycleService.attachAppLoaded(function (oEvent) {
                 console.log('[New Relic] attachAppLoaded event fired!');
