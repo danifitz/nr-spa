@@ -140,6 +140,8 @@ sap.ui.define([
                             }
                         }
                         console.log('[New Relic] Got information about the currently running app:', intent.semanticObject);
+                        // create a page action in New Relic to indicate an app is being loaded.
+                        newrelic.addPageAction('loadApp', intent);
                         newrelic.setCustomAttribute('semanticObject', intent.semanticObject);
                         newrelic.setCustomAttribute('plmAppName', intent.semanticObject);
                         newrelic.setCustomAttribute('action', intent.action);
