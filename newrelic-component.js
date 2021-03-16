@@ -156,7 +156,7 @@ sap.ui.define([
                     });
                 }
                 console.log('[New Relic] - app loaded event fired with parameters: ', oParameters);
-            }.bind(this));
+            }
         },
         /* 
          * Gets an instance of a service from the SAP UShell
