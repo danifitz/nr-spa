@@ -7,9 +7,9 @@ sap.ui.define([
      * hashFragment - the portion of the URL after the # i.e. #Shell-home
      * pageTitle - the title of the HTML document
      * environment - dev, qa, prod etc.
-     * userId [optional]
-     * userEmail [optional]
-     * userFullname [optional] - user details, only if they have consented to tracking
+     * userId [optional] - only if user consents to tracking
+     * userEmail [optional] - NOT COMPATIBLE WITH SAP VERSION
+     * userFullname [optional] - NOT COMPATIBLE WITH SAP VERSION
      * appIntent - the app intent as reported by SAP
      * appFrameworkId - SAP framework ID 
      * appId - the app ID as reported by SAP FLP
