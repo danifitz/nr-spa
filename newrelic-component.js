@@ -103,8 +103,9 @@ sap.ui.define([
          * When we detect an app being loaded, gather some information about it and
          * store that as custom attributes in New Relic.
          */
-        getAppLifecycle: async function () {
-            const appLifeCycleService = await this.getUshellServiceAsync("AppLifeCycle");
+        getAppLifecycle: function () {
+            // const appLifeCycleService = await this.getUshellServiceAsync("AppLifeCycle");
+            var appLifeCycleService = sap.ushell.Container.getService("AppLifeCycle");
 
             appLifeCycleService.attachAppLoaded(function (oEvent) {
                 console.log('[New Relic] attachAppLoaded event fired!');
@@ -115,17 +116,41 @@ sap.ui.define([
                     // get some key information about the app that just loaded to store as custom attributes in New Relic
                     // https://sapui5.hana.ondemand.com/#/api/sap.ushell.services.AppLifeCycle%23methods/attachAppLoaded
                     let currentApp = appLifeCycleService.getCurrentApplication();
-                    
-                    console.log('[New Relic] Got information about the currently running app', currentApp);
 
-                    currentApp.getInfo(['appIntent', 'appFrameworkId', 'appId', 'appVersion', 'appFrameworkVersion']).then(function (params) {
-                        for (const [key, value] of Object.entries(params)) {
-                            console.log('[New Relic]: Setting custom attributes from app loaded event:', `${key}: ${value}`);
-                            newrelic.setCustomAttribute(key, value);
+                    currentApp.getIntent().then(intent => {
+
+                        // Check if there are any params we need to parse
+                        if(Object.keys(intent.params).length !== 0) {
+                            //loop through all the properties in the params object
+                            for (const [key, param] of Object.entries(intent.params)) {
+                                console.log('[New Relic] getAppLifeCycle - checking for params in intent');
+                                //if we've dealing with an array
+                                if(Array.isArray(param)) {
+                                    console.log('[New Relic] getAppLifeCycle - checking if params are an array of args')
+                                    for(let i = 0; i < param.length; i++) {
+                                        newrelic.setCustomAttribute('intentParam' + key, param[i]);
+                                        console.log('[New Relic] getAppLifeCycle - setting intent params', 'intentParam' + key, param[i]);
+                                    }
+                                } else {
+                                    console.log('[New Relic] getAppLifeCycle - found param but it wasn\'t an array! it was a', typeof param);
+                                }
+                            }
                         }
-                    })
+                        console.log('[New Relic] Got information about the currently running app:', intent.semanticObject);
+                        newrelic.setCustomAttribute('semanticObject', intent.semanticObject);
+                        newrelic.setCustomAttribute('plmAppName', intent.semanticObject);
+                        newrelic.setCustomAttribute('action', intent.action);
+                        newrelic.setCustomAttribute('appSpecificRoute', intent.appSpecificRoute);
+                    });
+
+                    currentApp.getInfo(['productName', 'languageTag', 'appIntent', 'appFrameworkId', 'appId', 'appVersion', 'appFrameworkVersion']).then(function (params) {
+                        for (const [key, value] of Object.entries(params)) {
+                            console.log('[New Relic]: Setting custom attributes from app loaded event:', `${'plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase())}: ${value}`);
+                            newrelic.setCustomAttribute('plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase()), value);
+                        }
+                    });
                 }
-                console.log('[New Relic] - app loaded event fired with parameters: ', oParameters)
+                console.log('[New Relic] - app loaded event fired with parameters: ', oParameters);
             }.bind(this));
         },
         /* 
