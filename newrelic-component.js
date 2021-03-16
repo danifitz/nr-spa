@@ -89,8 +89,8 @@ sap.ui.define([
             if (newrelic) {
                 console.log('[New Relic]: Setting the current logged in user');
                 newrelic.setCustomAttribute('userId', oUserInfo.getId());
-                newrelic.setCustomAttribute('userEmail', oUserInfo.getEmail());
-                newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName());
+                // newrelic.setCustomAttribute('userEmail', oUserInfo.getEmail());
+                // newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName());
             }
         },
         /* 
