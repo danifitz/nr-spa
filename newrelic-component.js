@@ -109,6 +109,7 @@ sap.ui.define([
         getAppLifecycle: function () {
             // const appLifeCycleService = await this.getUshellServiceAsync("AppLifeCycle");
             var appLifeCycleService = sap.ushell.Container.getService("AppLifeCycle");
+            console.log('[New Relic] got AppLifeCycleService', appLifeCycleService);
 
             appLifeCycleService.attachAppLoaded(function (oEvent) {
                 console.log('[New Relic] attachAppLoaded event fired!');
@@ -156,7 +157,7 @@ sap.ui.define([
                     });
                 }
                 console.log('[New Relic] - app loaded event fired with parameters: ', oParameters);
-            }
+            });
         },
         /* 
          * Gets an instance of a service from the SAP UShell
