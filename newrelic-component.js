@@ -19,7 +19,7 @@ sap.ui.define([
     return Component.extend("com.plm.appnewrelicpocplugin.Component", {
 
 
-        // 1.60.13
+        // 1.60.13 - SAP UI5 version
 
         metadata: {
             "manifest": "json"
@@ -114,6 +114,7 @@ sap.ui.define([
             const appLifeCycleService = await this.getUshellServiceAsync("AppLifeCycle");
 
             appLifeCycleService.attachAppLoaded(function (oEvent) {
+                console.log('[New Relic] attachAppLoaded event fired!');
                 let oParameters = oEvent.getParameters();
                 
                 // we don't care if the user just landed on the home page i.e. FLP shell
