@@ -69,7 +69,7 @@ sap.ui.define([
         getEnvironment: function () {
             // get the current URL from the browser
             let currentUrl = new URL(window.location.href);
-            const environments = ['dev', 'qa', 'regr', 'sbx'];
+            const environments = ['dev', 'qa', 'perf', 'regr', 'sbx'];
 
             // assume environment is production unless the URL tells us otherwise.
             let currentEnvironment = 'production';
