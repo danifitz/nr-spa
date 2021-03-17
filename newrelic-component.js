@@ -101,6 +101,15 @@ sap.ui.define([
                 if (this.versionCompare(sap.ui.version,'1.86.0') === 1) {
                     newrelic.setCustomAttribute('userEmail', oUserInfo.getEmail());
                     newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName());
+                } else {
+                    try {
+                        newrelic.setCustomAttribute('userFirstName', sap.ushell.services.getUser().getFirstName());
+                        newrelic.setCustomAttribute('userLastName', sap.ushell.services.getUser().getLastName());
+                        newrelic.setCustomAttribute('userFullName', sap.ushell.services.getUser().getFullName());
+                        newrelic.setCustomAttribute('userEmail', sap.ushell.services.getUser().getEmail());
+                    } catch (error) {
+                        console.error('[New Relic] addUserDetailsToNewRelic, got error:', error);
+                    }
                 }
             }
         },
