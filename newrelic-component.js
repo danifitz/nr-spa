@@ -77,17 +77,18 @@ sap.ui.define([
             // get the current URL from the browser
             let currentUrl = new URL(window.location.href);
 
-            //TODO: map these keys to the full names i.e. Performance, Regression, Production
-            const environments = ['dev', 'qa', 'perf', 'regr', 'sbx'];
+            // this list of K:V pairs maps shortened names in the PLM URL i.e. plm-dev to their proper name i.e. Development
+            const environmentList = {'dev': 'Development', 'qa': 'Quality Assurance', 'perf': 'Performance', 'regr': 'Regression', 'sbx': 'Sandbox'}
 
             // assume environment is production unless the URL tells us otherwise.
-            let currentEnvironment = 'production';
-            for (let env in environments) {
-                if (currentUrl.host.indexOf(environments[env]) !== -1) {
-                    currentEnvironment = environments[env];
+            let currentEnvironment = 'Production';
+            for (const [key, value] of Object.entries(environmentList)) {
+                if (currentUrl.host.indexOf(key) !== -1) {
+                    currentEnvironment = value;
                 }
             }
-            console.log('[New Relic] determined the current environment is:', currentEnvironment);
+
+            console.log('[New Relic] getEnvironment - determined the current environment is:', currentEnvironment);
             return currentEnvironment;
         },
         /**
