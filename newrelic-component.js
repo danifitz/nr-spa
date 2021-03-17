@@ -54,7 +54,7 @@ sap.ui.define([
                 this.getAppLifecycle();
 
                 // capture which app is running when this component first loads
-                captureAppDetails();
+                this.captureAppDetails();
 
                 // add event listener to hash changes
                 window.addEventListener('hashchange', () => {
