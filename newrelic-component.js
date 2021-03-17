@@ -127,25 +127,6 @@ sap.ui.define([
             if (typeof intent.appSpecificRoute !== 'undefined') {
                 newrelic.setCustomAttribute('appSpecificRoute', intent.appSpecificRoute);
             }
-
-            // Check if there are any params we need to parse
-            // Capturing these params is overkill!
-            // if (Object.keys(intent.params).length !== 0) {
-            //     //loop through all the properties in the params object
-            //     for (const [key, param] of Object.entries(intent.params)) {
-            //         console.log('[New Relic] getAppLifeCycle - checking for params in intent');
-            //         //if we're dealing with an array
-            //         if (Array.isArray(param)) {
-            //             console.log('[New Relic] getAppLifeCycle - checking if params are an array of args')
-            //             for (let i = 0; i < param.length; i++) {
-            //                 newrelic.setCustomAttribute('intentParam' + key, param[i]);
-            //                 console.log('[New Relic] getAppLifeCycle - setting intent params', 'intentParam' + key, param[i]);
-            //             }
-            //         } else {
-            //             console.log('[New Relic] getAppLifeCycle - found param but it wasn\'t an array! it was a', typeof param);
-            //         }
-            //     }
-            // }
         },
         /** 
          * Uses the AppLifeCycle service to listen for apps being loaded in the FLP.
