@@ -121,6 +121,7 @@ sap.ui.define([
             newrelic.setCustomAttribute('semanticObject', intent.semanticObject);
             newrelic.setCustomAttribute('plmAppName', intent.semanticObject);
             newrelic.setCustomAttribute('action', intent.action);
+            newrelic.setCustomAttribute('pageTitle', document.title);
             // app specific route is sometimes undefined, so check before trying to set attribute
             if (typeof intent.appSpecificRoute !== 'undefined') {
                 newrelic.setCustomAttribute('appSpecificRoute', intent.appSpecificRoute);
