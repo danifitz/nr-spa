@@ -95,14 +95,20 @@ sap.ui.define([
          * Adds details about the current logged in user as custom attributes to New Relic
          */
         addUserDetailsToNewRelic: async function () {
-            const oUserInfo = await this.getUshellServiceAsync("UserInfo");
+            // const oUserInfo = await this.getUshellServiceAsync("UserInfo");
+            const userInfoService = sap.ushell.Container.getService("UserInfo").getUser();
             if (newrelic) {
                 console.log('[New Relic]: Setting the current logged in user');
-                newrelic.setCustomAttribute('userId', oUserInfo.getId());
-                if (this.versionCompare(sap.ui.version,'1.86.0') === 1) {
-                    newrelic.setCustomAttribute('userEmail', oUserInfo.getEmail());
-                    newrelic.setCustomAttribute('userFullName', oUserInfo.getFullName());
+                try {
+                    newrelic.setCustomAttribute('userId', userInfoService.getId());
+                    newrelic.setCustomAttribute('userEmail', userInfoService.getEmail());
+                    newrelic.setCustomAttribute('userFullName', userInfoService.getFullName());
+                } catch(error) {
+                    console.error('[New Relic] addUserDetailsToNewRelic, got error fetching email, fullname', error);
                 }
+                // if (this.versionCompare(sap.ui.version,'1.86.0') === 1) {
+                    
+                // }
             }
         },
         /**  
@@ -150,7 +156,7 @@ sap.ui.define([
                             newrelic.setCustomAttribute('plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase()), value);
                         }
                     });
-                }
+                } 
             });
         },
         getIntent: function () {
