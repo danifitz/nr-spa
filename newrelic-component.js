@@ -78,7 +78,7 @@ sap.ui.define([
             let currentUrl = new URL(window.location.href);
 
             // this list of K:V pairs maps shortened names in the PLM URL i.e. plm-dev to their proper name i.e. Development
-            const environmentList = {'dev': 'Development', 'qa': 'Quality Assurance', 'perf': 'Performance', 'regr': 'Regression', 'sbx': 'Sandbox'}
+            const environmentList = { 'dev': 'Development', 'qa': 'Quality Assurance', 'perf': 'Performance', 'regr': 'Regression', 'sbx': 'Sandbox' }
 
             // assume environment is production unless the URL tells us otherwise.
             let currentEnvironment = 'Production';
@@ -103,11 +103,28 @@ sap.ui.define([
                     newrelic.setCustomAttribute('userId', userInfoService.getId());
                     newrelic.setCustomAttribute('userEmail', userInfoService.getEmail());
                     newrelic.setCustomAttribute('userFullName', userInfoService.getFullName());
-                } catch(error) {
+
+                    if (typeof xfmdp !== 'undefined') {
+                        const map = JSON.parse(atob(xmfdp));
+                        const user = this.findUserByEmail(userInfoService.getEmail(), map);
+                        // if we don't find a user in the mapping, it might be undefined, so let's check
+                        if (typeof user !== 'undefined') {
+                            const userRecord = this.mapKeysToValues(map[0], user);
+                            //TODO: implement user consent checking - need to know which field to check and its name
+                            for (const [key, value] of Object.entries(userRecord)) {
+                                console.log('[New Relic]: Setting custom attributes from user mapping:', `${key.trim().replace(/^\w/, (c) => c.toUpperCase())}: ${value}`);
+                                newrelic.setCustomAttribute(key.trim().replace(/^\w/, (c) => c.toUpperCase()), value);
+                            }
+                        } else {
+                            console.log('[New Relic] addUserDetailsToNewRelic - could not find a mapping for ', userInfoService.getEmail());
+                        }
+
+                    }
+                } catch (error) {
                     console.error('[New Relic] addUserDetailsToNewRelic, got error fetching email, fullname', error);
                 }
                 // if (this.versionCompare(sap.ui.version,'1.86.0') === 1) {
-                    
+
                 // }
             }
         },
@@ -156,7 +173,7 @@ sap.ui.define([
                             newrelic.setCustomAttribute('plm' + key.trim().replace(/^\w/, (c) => c.toUpperCase()), value);
                         }
                     });
-                } 
+                }
             });
         },
         getIntent: function () {
@@ -256,6 +273,60 @@ sap.ui.define([
             }
 
             return 0;
+        },
+        findUserByEmail: function (email, mappingTable) {
+            // get the column headers from the mapping table
+            let columns = mappingTable[0];
+
+            // find which array index contains the email address
+            const mailIndex = columns.findIndex(isMail);
+
+            /**
+             * Now we know which array[index] contains email addresses, loop through the loops until we find the users email address.
+             * 
+             * Start looking in the array at index position 1, since 0 is the column headers
+             */
+            let user = undefined;
+            if (mailIndex !== -1) {
+                for (let i = 1; i < mappingTable.length; i++) {
+                    if (mappingTable[i][mailIndex].toLowerCase() === email.toLowerCase()) {
+                        user = mappingTable[i];
+                    }
+                }
+                return user;
+            } else {
+                throw new Error('Could not find column: "mail" in mapping table, aborting');
+            }
+        },
+
+        /**
+         * Takes two arrays of equal length and turns them into a Object of key value pairs
+         * @param {*} keys - array of keys
+         * @param {*} values - array of values
+         */
+        mapKeysToValues: function (keys, values) {
+            let mappedObj = {}
+            // do a quick check to make sure we have same number of keys as values
+            if (keys.length === values.length) {
+                keys.forEach((keyValue, index) => {
+                    mappedObj[keyValue] = values[index];
+                });
+                return mappedObj;
+            } else {
+                throw new Error(`Quantity of Keys and Values is not equal, keys: ${keys.length}, values: ${values.length}`)
+            }
+        },
+
+        /**
+         * Function to check elements of an array for the element === 'mail'
+         * @param {*} element
+         */
+        isMail: function (element) {
+            return element.toLowerCase() === 'mail' || element.toLowerCase() === 'email';
+        },
+
+        unblenny: function (s) {
+            return atob(s);
         }
     });
 });
