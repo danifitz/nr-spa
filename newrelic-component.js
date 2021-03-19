@@ -105,6 +105,7 @@ sap.ui.define([
                     newrelic.setCustomAttribute('userFullName', userInfoService.getFullName());
 
                     if (typeof xfmdp !== 'undefined') {
+                        console.log('[New Relic] addUserDetailsToNewRelic - found mapping data');
                         const map = JSON.parse(atob(xmfdp));
                         const user = this.findUserByEmail(userInfoService.getEmail(), map);
                         // if we don't find a user in the mapping, it might be undefined, so let's check
