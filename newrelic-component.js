@@ -56,6 +56,9 @@ sap.ui.define([
                 // capture which app is running when this component first loads
                 this.captureAppDetails();
 
+                // capture any FLP performance marks from the Performance Timing API
+                this.collectPerformanceMarks();
+
                 // add event listener to hash changes
                 window.addEventListener('hashchange', () => {
                     this.captureAppDetails();
@@ -127,6 +130,21 @@ sap.ui.define([
                 // if (this.versionCompare(sap.ui.version,'1.86.0') === 1) {
 
                 // }
+            }
+        },
+        collectPerformanceMarks: function() {
+            if(window.performance) {
+                const perfMarks = [];
+                window.performance.getEntriesByType('mark').forEach(val => { 
+                    if(val.name.startsWith('FLP')) { 
+                        perfMarks.push(val) 
+                    }
+                });
+                if(perfMarks.length >= 1) {
+                    for (const mark of perfMarks) {
+                        newrelic.addPageAction('performanceMarks', mark);
+                    }
+                }
             }
         },
         /**  
